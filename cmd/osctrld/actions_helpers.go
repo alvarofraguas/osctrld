@@ -177,7 +177,6 @@ func runScript(directory, script string) (string, error) {
 
 	// Execute the script
 	cmd := exec.Command(tmpFile.Name())
-	cmd.CombinedOutput()
 
 	// Set the command's output to the buffers
 	cmd.Stdout = &stdout

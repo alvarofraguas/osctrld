@@ -54,7 +54,7 @@ func SendRequest(reqType, reqURL string, params io.Reader, headers map[string]st
 	}
 	req, err := http.NewRequest(reqType, reqURL, params)
 	if err != nil {
-		return 0, []byte("Cound not prepare request"), err
+		return 0, []byte("Could not prepare request"), err
 	}
 	// Set custom User-Agent
 	req.Header.Set(UserAgent, osctrlUserAgent)

@@ -24,6 +24,7 @@ type JSONConfiguration struct {
 	Verbose      bool   `json:"verbose"`
 	Force        bool   `json:"force"`
 	LogFormat    string `json:"logFormat"`
+	Interval     int    `json:"interval"`
 }
 
 // Function to load the configuration file and assign to variables

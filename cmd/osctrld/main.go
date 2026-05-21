@@ -169,6 +169,14 @@ func init() {
 			EnvVars:     []string{"OSCTRL_LOG_FORMAT"},
 			Destination: &jsonConfig.LogFormat,
 		},
+		&cli.IntFlag{
+			Name:        "interval",
+			Aliases:     []string{"I"},
+			Value:       60,
+			Usage:       "Sync interval in minutes for service mode",
+			EnvVars:     []string{"OSCTRL_INTERVAL"},
+			Destination: &jsonConfig.Interval,
+		},
 	}
 	// Initialize CLI flags commands
 	commands = []*cli.Command{

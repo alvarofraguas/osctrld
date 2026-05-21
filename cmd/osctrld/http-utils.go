@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 )
@@ -70,7 +70,7 @@ func SendRequest(reqType, reqURL string, params io.Reader, headers map[string]st
 	//defer resp.Body.Close()
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			log.Printf("Failed to close body %v", err)
+			slog.Error("failed to close response body", "error", err)
 		}
 	}()
 	// Read body

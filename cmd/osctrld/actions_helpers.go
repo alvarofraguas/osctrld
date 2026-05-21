@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/exec"
@@ -98,7 +98,7 @@ func checkFileExist(path string) bool {
 func checkFileContent(path, content string) bool {
 	f, err := os.Open(path)
 	if err != nil {
-		log.Printf("error opening %s - %v", path, err)
+		slog.Error("error opening file", "path", path, "error", err)
 		return false
 	}
 	defer f.Close()
@@ -140,7 +140,7 @@ func getOsqueryVersion() string {
 	cmd := exec.Command(osquerydBin, FlagOsqueryVersion)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("error running osqueryd - %v - %s", err, string(out))
+		slog.Error("error running osqueryd", "error", err, "output", string(out))
 		return ""
 	}
 	splitted := strings.Split(strings.TrimSpace(string(out)), " ")
@@ -193,7 +193,7 @@ func runScript(directory, script string) (string, error) {
 
 	// If stderr has content but no error was returned, log it
 	if errOutput != "" {
-		log.Printf("script generated warnings: %s", errOutput)
+		slog.Warn("script generated warnings", "stderr", errOutput)
 	}
 
 	return output, nil

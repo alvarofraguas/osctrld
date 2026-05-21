@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"runtime"
 
@@ -198,14 +198,19 @@ func cliWrapper(action func(*cli.Context) error) func(*cli.Context) error {
 		if configFile != defEmptyValue {
 			jsonConfig, err = loadConfiguration(configFile, c.Bool("verbose"))
 			if err != nil {
-				exitError := fmt.Sprintf("\n❌ Error reading configuration file (%s) - %v", configFile, err)
-				return cli.Exit(exitError, 2)
+				slog.Error("error reading configuration file", "path", configFile, "error", err)
+				return cli.Exit("", 2)
 			}
 		}
+		logLevel := slog.LevelInfo
 		if jsonConfig.Verbose {
-			log.Printf("⏳ Initializing %s...", appName)
-			fmt.Println()
+			logLevel = slog.LevelDebug
 		}
+		logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+			Level: logLevel,
+		}))
+		slog.SetDefault(logger)
+		slog.Debug("initializing", "app", appName)
 		// Based on OS, assign values for flag and secret file, if they have not been assigned already
 		switch runtime.GOOS {
 		case DarwinOS:
@@ -268,30 +273,29 @@ func cliWrapper(action func(*cli.Context) error) func(*cli.Context) error {
 		}
 		// Check for required parameters
 		if jsonConfig.Environment == defEmptyValue {
-			exitError := fmt.Sprintln("\n❌ Environment for osctrl is required")
-			return cli.Exit(exitError, 2)
+			slog.Error("environment for osctrl is required")
+			return cli.Exit("", 2)
 		}
 		if jsonConfig.BaseURL == defEmptyValue {
-			exitError := fmt.Sprintln("\n❌ Base URL for osctrl is required")
-			return cli.Exit(exitError, 2)
+			slog.Error("base URL for osctrl is required")
+			return cli.Exit("", 2)
 		}
 		// Initialize URLs
 		osctrlURLs = genURLs(jsonConfig.BaseURL, jsonConfig.Environment, jsonConfig.Insecure)
-		if jsonConfig.Verbose {
-			log.Printf("📌 Osquery Path: %s", jsonConfig.OsqueryPath)
-			log.Printf("🔎 Flag file: %s", jsonConfig.FlagFile)
-			log.Printf("🔑 Secret file: %s", jsonConfig.SecretFile)
-			log.Printf("🔏 Certificate: %s", jsonConfig.CertFile)
-			log.Printf("+ Enroll script: %s", jsonConfig.EnrollScript)
-			log.Printf("- Remove script: %s", jsonConfig.RemoveScript)
-			log.Printf("🔗 BaseURL: %s", jsonConfig.BaseURL)
-			log.Printf("📍 Environment: %s", jsonConfig.Environment)
-			log.Printf("🔴 Insecure: %v", jsonConfig.Insecure)
-			log.Printf("📢 Verbose: %v", jsonConfig.Verbose)
-			log.Printf("🦾 Force: %v", jsonConfig.Force)
-			log.Printf("💻 Command: %s", c.Command.Name)
-			fmt.Println()
-		}
+		slog.Debug("configuration loaded",
+			"osquery_path", jsonConfig.OsqueryPath,
+			"flag_file", jsonConfig.FlagFile,
+			"secret_file", jsonConfig.SecretFile,
+			"cert_file", jsonConfig.CertFile,
+			"enroll_script", jsonConfig.EnrollScript,
+			"remove_script", jsonConfig.RemoveScript,
+			"base_url", jsonConfig.BaseURL,
+			"environment", jsonConfig.Environment,
+			"insecure", jsonConfig.Insecure,
+			"verbose", jsonConfig.Verbose,
+			"force", jsonConfig.Force,
+			"command", c.Command.Name,
+		)
 		return action(c)
 	}
 }
@@ -302,13 +306,15 @@ func cliAction(c *cli.Context) error {
 		if err := cli.ShowAppHelp(c); err != nil {
 			log.Fatalf("Error with help - %s", err)
 		}
-		return cli.Exit("❌ No command provided", 2)
+		slog.Error("no command provided")
+		return cli.Exit("", 2)
 	}
 	if c.Command.Name == "" {
 		if err := cli.ShowAppHelp(c); err != nil {
 			log.Fatalf("Error with help - %s", err)
 		}
-		return cli.Exit("❌ Invalid command", 2)
+		slog.Error("invalid command")
+		return cli.Exit("", 2)
 	}
 	return nil
 }

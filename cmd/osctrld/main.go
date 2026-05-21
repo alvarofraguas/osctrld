@@ -1,13 +1,12 @@
 package main
 
 import (
-	"log"
-	"log/slog"
 	"os"
 	"runtime"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
-	_ "github.com/rs/zerolog"
 )
 
 const (
@@ -207,19 +206,20 @@ func cliWrapper(action func(*cli.Context) error) func(*cli.Context) error {
 		if configFile != defEmptyValue {
 			jsonConfig, err = loadConfiguration(configFile, c.Bool("verbose"))
 			if err != nil {
-				slog.Error("error reading configuration file", "path", configFile, "error", err)
+				log.Error().Str("path", configFile).Err(err).Msg("error reading configuration file")
 				return cli.Exit("", 2)
 			}
 		}
-		logLevel := slog.LevelInfo
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 		if jsonConfig.Verbose {
-			logLevel = slog.LevelDebug
+			zerolog.SetGlobalLevel(zerolog.DebugLevel)
 		}
-		logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-			Level: logLevel,
-		}))
-		slog.SetDefault(logger)
-		slog.Debug("initializing", "app", appName)
+		if jsonConfig.LogFormat == "json" {
+			log.Logger = zerolog.New(os.Stderr).With().Timestamp().Logger()
+		} else {
+			log.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger()
+		}
+		log.Debug().Str("app", appName).Msg("initializing")
 		// Based on OS, assign values for flag and secret file, if they have not been assigned already
 		switch runtime.GOOS {
 		case DarwinOS:
@@ -282,29 +282,29 @@ func cliWrapper(action func(*cli.Context) error) func(*cli.Context) error {
 		}
 		// Check for required parameters
 		if jsonConfig.Environment == defEmptyValue {
-			slog.Error("environment for osctrl is required")
+			log.Error().Msg("environment for osctrl is required")
 			return cli.Exit("", 2)
 		}
 		if jsonConfig.BaseURL == defEmptyValue {
-			slog.Error("base URL for osctrl is required")
+			log.Error().Msg("base URL for osctrl is required")
 			return cli.Exit("", 2)
 		}
 		// Initialize URLs
 		osctrlURLs = genURLs(jsonConfig.BaseURL, jsonConfig.Environment, jsonConfig.Insecure)
-		slog.Debug("configuration loaded",
-			"osquery_path", jsonConfig.OsqueryPath,
-			"flag_file", jsonConfig.FlagFile,
-			"secret_file", jsonConfig.SecretFile,
-			"cert_file", jsonConfig.CertFile,
-			"enroll_script", jsonConfig.EnrollScript,
-			"remove_script", jsonConfig.RemoveScript,
-			"base_url", jsonConfig.BaseURL,
-			"environment", jsonConfig.Environment,
-			"insecure", jsonConfig.Insecure,
-			"verbose", jsonConfig.Verbose,
-			"force", jsonConfig.Force,
-			"command", c.Command.Name,
-		)
+		log.Debug().
+			Str("osquery_path", jsonConfig.OsqueryPath).
+			Str("flag_file", jsonConfig.FlagFile).
+			Str("secret_file", jsonConfig.SecretFile).
+			Str("cert_file", jsonConfig.CertFile).
+			Str("enroll_script", jsonConfig.EnrollScript).
+			Str("remove_script", jsonConfig.RemoveScript).
+			Str("base_url", jsonConfig.BaseURL).
+			Str("environment", jsonConfig.Environment).
+			Bool("insecure", jsonConfig.Insecure).
+			Bool("verbose", jsonConfig.Verbose).
+			Bool("force", jsonConfig.Force).
+			Str("command", c.Command.Name).
+			Msg("configuration loaded")
 		return action(c)
 	}
 }
@@ -313,16 +313,16 @@ func cliWrapper(action func(*cli.Context) error) func(*cli.Context) error {
 func cliAction(c *cli.Context) error {
 	if c.NumFlags() == 0 {
 		if err := cli.ShowAppHelp(c); err != nil {
-			log.Fatalf("Error with help - %s", err)
+			log.Fatal().Err(err).Msg("error showing help")
 		}
-		slog.Error("no command provided")
+		log.Error().Msg("no command provided")
 		return cli.Exit("", 2)
 	}
 	if c.Command.Name == "" {
 		if err := cli.ShowAppHelp(c); err != nil {
-			log.Fatalf("Error with help - %s", err)
+			log.Fatal().Err(err).Msg("error showing help")
 		}
-		slog.Error("invalid command")
+		log.Error().Msg("invalid command")
 		return cli.Exit("", 2)
 	}
 	return nil
@@ -346,6 +346,6 @@ func main() {
 	// Let's go!
 	app = buildApp()
 	if err := app.Run(os.Args); err != nil {
-		log.Fatalf("Failed to execute %v", err)
+		log.Fatal().Err(err).Msg("failed to execute")
 	}
 }

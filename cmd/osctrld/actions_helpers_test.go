@@ -16,8 +16,9 @@ func TestWriteContentExists_NewFile(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "newfile.txt")
 
-	err := writeContentExists(path, "hello", "test", false)
+	changed, err := writeContentExists(path, "hello", "test", false)
 	assert.NoError(t, err)
+	assert.True(t, changed, "new file should report changed")
 
 	content, err := os.ReadFile(path)
 	require.NoError(t, err)
@@ -29,8 +30,9 @@ func TestWriteContentExists_SameContent(t *testing.T) {
 	path := filepath.Join(dir, "existing.txt")
 	os.WriteFile(path, []byte("hello"), 0700)
 
-	err := writeContentExists(path, "hello", "test", false)
+	changed, err := writeContentExists(path, "hello", "test", false)
 	assert.NoError(t, err)
+	assert.False(t, changed, "same content should not report changed")
 }
 
 func TestWriteContentExists_DifferentContentNoForce(t *testing.T) {
@@ -38,9 +40,10 @@ func TestWriteContentExists_DifferentContentNoForce(t *testing.T) {
 	path := filepath.Join(dir, "existing.txt")
 	os.WriteFile(path, []byte("old"), 0700)
 
-	err := writeContentExists(path, "new", "test", false)
+	changed, err := writeContentExists(path, "new", "test", false)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "please use --force")
+	assert.False(t, changed, "should not report changed on error")
 
 	content, _ := os.ReadFile(path)
 	assert.Equal(t, "old", string(content))
@@ -51,8 +54,9 @@ func TestWriteContentExists_DifferentContentWithForce(t *testing.T) {
 	path := filepath.Join(dir, "existing.txt")
 	os.WriteFile(path, []byte("old"), 0700)
 
-	err := writeContentExists(path, "new", "test", true)
+	changed, err := writeContentExists(path, "new", "test", true)
 	assert.NoError(t, err)
+	assert.True(t, changed, "forced overwrite should report changed")
 
 	content, _ := os.ReadFile(path)
 	assert.Equal(t, "new", string(content))

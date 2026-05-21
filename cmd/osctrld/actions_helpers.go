@@ -108,23 +108,23 @@ func checkFileContent(path, content string) bool {
 }
 
 // Helper function to write content to a file if not different from existing
-func writeContentExists(path, content, name string, force bool) error {
+func writeContentExists(path, content, name string, force bool) (bool, error) {
 	if checkFileExist(path) {
 		if !checkFileContent(path, content) {
 			if force {
 				if err := os.WriteFile(path, []byte(content), 0700); err != nil {
-					return fmt.Errorf("error overwriting %s to %s - %v", name, path, err)
+					return false, fmt.Errorf("error overwriting %s to %s - %v", name, path, err)
 				}
-			} else {
-				return fmt.Errorf("%s exists, please use --force to overwrite", path)
+				return true, nil
 			}
+			return false, fmt.Errorf("%s exists, please use --force to overwrite", path)
 		}
-	} else {
-		if err := os.WriteFile(path, []byte(content), 0700); err != nil {
-			return fmt.Errorf("error writing %s to %s - %v", name, path, err)
-		}
+		return false, nil
 	}
-	return nil
+	if err := os.WriteFile(path, []byte(content), 0700); err != nil {
+		return false, fmt.Errorf("error writing %s to %s - %v", name, path, err)
+	}
+	return true, nil
 }
 
 // Helper function to execute the "osqueryd -version" command and return output

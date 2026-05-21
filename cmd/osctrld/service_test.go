@@ -30,3 +30,16 @@ func TestIntervalWithJitter_SmallInterval(t *testing.T) {
 		assert.LessOrEqual(t, result, max)
 	}
 }
+
+func TestServiceCommandRegistered(t *testing.T) {
+	app := buildApp()
+	found := false
+	for _, cmd := range app.Commands {
+		if cmd.Name == "service" {
+			found = true
+			assert.Equal(t, "Run as a daemon, periodically syncing flags and certificate", cmd.Usage)
+			break
+		}
+	}
+	assert.True(t, found, "service command should be registered")
+}

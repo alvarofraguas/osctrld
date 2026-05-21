@@ -205,6 +205,11 @@ func init() {
 			Usage:  "Retrieve server certificate for osquery from osctrl and write it locally",
 			Action: cliWrapper(getCert),
 		},
+		{
+			Name:   "service",
+			Usage:  "Run as a daemon, periodically syncing flags and certificate",
+			Action: cliWrapper(serviceNode),
+		},
 	}
 }
 

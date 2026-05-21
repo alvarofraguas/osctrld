@@ -3,6 +3,8 @@ package main
 import (
 	"math/rand/v2"
 	"time"
+
+	"github.com/urfave/cli/v2"
 )
 
 func intervalWithJitter(base time.Duration) time.Duration {
@@ -11,6 +13,6 @@ func intervalWithJitter(base time.Duration) time.Duration {
 	return base + time.Duration(jitter)
 }
 
-func serviceNode() error {
+func serviceNode(c *cli.Context) error {
 	return nil
 }

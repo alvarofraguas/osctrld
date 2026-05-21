@@ -24,6 +24,7 @@ type JSONConfiguration struct {
 	Insecure     bool   `json:"insecure"`
 	Verbose      bool   `json:"verbose"`
 	Force        bool   `json:"force"`
+	LogFormat    string `json:"logFormat"`
 }
 
 // Function to load the configuration file and assign to variables

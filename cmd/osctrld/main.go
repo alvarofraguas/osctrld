@@ -162,6 +162,14 @@ func init() {
 			EnvVars:     []string{"OSCTRL_FORCE"},
 			Destination: &jsonConfig.Force,
 		},
+		&cli.StringFlag{
+			Name:        "log-format",
+			Aliases:     []string{"L"},
+			Value:       "text",
+			Usage:       "Log output format: text or json",
+			EnvVars:     []string{"OSCTRL_LOG_FORMAT"},
+			Destination: &jsonConfig.LogFormat,
+		},
 	}
 	// Initialize CLI flags commands
 	commands = []*cli.Command{

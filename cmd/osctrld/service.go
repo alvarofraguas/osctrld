@@ -24,11 +24,11 @@ func syncOnce(c *cli.Context) {
 	defer func() { jsonConfig.Force = originalForce }()
 
 	log.Info().Msg("syncing flags")
-	if err := getFlags(c); err != nil {
+	if _, err := getFlags(c); err != nil {
 		log.Error().Err(err).Msg("failed to sync flags")
 	}
 	log.Info().Msg("syncing cert")
-	if err := getCert(c); err != nil {
+	if _, err := getCert(c); err != nil {
 		log.Error().Err(err).Msg("failed to sync cert")
 	}
 }

@@ -69,33 +69,35 @@ func enrollNode(c *cli.Context) error {
 }
 
 // Function to action on flags command
-func getFlags(c *cli.Context) error {
+func getFlags(c *cli.Context) (bool, error) {
 	log.Debug().Str("url", osctrlURLs.Flags).Msg("getting flags")
 	flags, err := retrieveFlags(jsonConfig.Secret, jsonConfig.SecretFile, jsonConfig.CertFile)
 	if err != nil {
-		return fmt.Errorf("error retrieving flags - %v", err)
+		return false, fmt.Errorf("error retrieving flags - %v", err)
 	}
 	log.Debug().Str("flags", flags).Msg("flags content")
-	if err := writeContentExists(jsonConfig.FlagFile, flags, "flags", jsonConfig.Force); err != nil {
-		return err
+	changed, err := writeContentExists(jsonConfig.FlagFile, flags, "flags", jsonConfig.Force)
+	if err != nil {
+		return false, err
 	}
 	log.Info().Str("path", jsonConfig.FlagFile).Msg("flags ready")
-	return nil
+	return changed, nil
 }
 
 // Function to action on cert command
-func getCert(c *cli.Context) error {
+func getCert(c *cli.Context) (bool, error) {
 	log.Debug().Str("url", osctrlURLs.Cert).Msg("getting cert")
 	cert, err := retrieveCert(jsonConfig.Secret, osctrlURLs.Cert, jsonConfig.Insecure)
 	if err != nil {
-		return fmt.Errorf("error retrieving cert - %v", err)
+		return false, fmt.Errorf("error retrieving cert - %v", err)
 	}
 	log.Debug().Str("cert", cert).Msg("cert content")
-	if err := writeContentExists(jsonConfig.CertFile, cert, "cert", jsonConfig.Force); err != nil {
-		return err
+	changed, err := writeContentExists(jsonConfig.CertFile, cert, "cert", jsonConfig.Force)
+	if err != nil {
+		return false, err
 	}
 	log.Info().Str("path", jsonConfig.CertFile).Msg("cert ready")
-	return nil
+	return changed, nil
 }
 
 // Function to action on remove command. It retrieves the script to run the removal from osctrl

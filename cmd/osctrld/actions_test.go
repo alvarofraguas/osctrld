@@ -55,8 +55,9 @@ func TestGetFlags_Success(t *testing.T) {
 	osctrlURLs.Flags = server.URL + "/flags"
 
 	c := newTestCLIContext()
-	err := getFlags(c)
+	changed, err := getFlags(c)
 	assert.NoError(t, err)
+	assert.True(t, changed, "new flags file should report changed")
 
 	content, err := os.ReadFile(jsonConfig.FlagFile)
 	require.NoError(t, err)
@@ -75,7 +76,7 @@ func TestGetFlags_ServerError(t *testing.T) {
 	osctrlURLs.Flags = server.URL + "/flags"
 
 	c := newTestCLIContext()
-	err := getFlags(c)
+	_, err := getFlags(c)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "error retrieving flags")
 }
@@ -93,8 +94,9 @@ func TestGetCert_Success(t *testing.T) {
 	osctrlURLs.Cert = server.URL + "/cert"
 
 	c := newTestCLIContext()
-	err := getCert(c)
+	changed, err := getCert(c)
 	assert.NoError(t, err)
+	assert.True(t, changed, "new cert file should report changed")
 
 	content, err := os.ReadFile(jsonConfig.CertFile)
 	require.NoError(t, err)
@@ -113,7 +115,7 @@ func TestGetCert_ServerError(t *testing.T) {
 	osctrlURLs.Cert = server.URL + "/cert"
 
 	c := newTestCLIContext()
-	err := getCert(c)
+	_, err := getCert(c)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "error retrieving cert")
 }

@@ -196,14 +196,20 @@ func init() {
 			Action: cliWrapper(verifyNode),
 		},
 		{
-			Name:   "flags",
-			Usage:  "Retrieve flags for osquery from osctrl and write them locally",
-			Action: cliWrapper(getFlags),
+			Name:  "flags",
+			Usage: "Retrieve flags for osquery from osctrl and write them locally",
+			Action: cliWrapper(func(c *cli.Context) error {
+				_, err := getFlags(c)
+				return err
+			}),
 		},
 		{
-			Name:   "cert",
-			Usage:  "Retrieve server certificate for osquery from osctrl and write it locally",
-			Action: cliWrapper(getCert),
+			Name:  "cert",
+			Usage: "Retrieve server certificate for osquery from osctrl and write it locally",
+			Action: cliWrapper(func(c *cli.Context) error {
+				_, err := getCert(c)
+				return err
+			}),
 		},
 		{
 			Name:   "service",

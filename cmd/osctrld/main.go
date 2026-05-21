@@ -7,6 +7,7 @@ import (
 	"runtime"
 
 	"github.com/urfave/cli/v2"
+	_ "github.com/rs/zerolog"
 )
 
 const (

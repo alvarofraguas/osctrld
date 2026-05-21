@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 // Helper function to retrieve flags
@@ -98,7 +99,7 @@ func checkFileExist(path string) bool {
 func checkFileContent(path, content string) bool {
 	f, err := os.Open(path)
 	if err != nil {
-		slog.Error("error opening file", "path", path, "error", err)
+		log.Error().Str("path", path).Err(err).Msg("error opening file")
 		return false
 	}
 	defer f.Close()
@@ -140,7 +141,7 @@ func getOsqueryVersion() string {
 	cmd := exec.Command(osquerydBin, FlagOsqueryVersion)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		slog.Error("error running osqueryd", "error", err, "output", string(out))
+		log.Error().Err(err).Str("output", string(out)).Msg("error running osqueryd")
 		return ""
 	}
 	splitted := strings.Split(strings.TrimSpace(string(out)), " ")
@@ -193,7 +194,7 @@ func runScript(directory, script string) (string, error) {
 
 	// If stderr has content but no error was returned, log it
 	if errOutput != "" {
-		slog.Warn("script generated warnings", "stderr", errOutput)
+		log.Warn().Str("stderr", errOutput).Msg("script generated warnings")
 	}
 
 	return output, nil

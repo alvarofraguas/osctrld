@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log/slog"
 	"runtime"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"github.com/shirou/gopsutil/v3/process"
 	"github.com/urfave/cli/v2"
 )
@@ -59,7 +59,7 @@ type VerifyResponse struct {
 
 // Function to action on enroll command
 func enrollNode(c *cli.Context) error {
-	slog.Debug("enrolling node", "url", osctrlURLs.Enroll)
+	log.Debug().Str("url", osctrlURLs.Enroll).Msg("enrolling node")
 	script, err := retrieveScript(jsonConfig.Secret, osctrlURLs.Enroll, jsonConfig.Insecure)
 	if err != nil {
 		return fmt.Errorf("error retrieving enroll - %v", err)
@@ -70,37 +70,37 @@ func enrollNode(c *cli.Context) error {
 
 // Function to action on flags command
 func getFlags(c *cli.Context) error {
-	slog.Debug("getting flags", "url", osctrlURLs.Flags)
+	log.Debug().Str("url", osctrlURLs.Flags).Msg("getting flags")
 	flags, err := retrieveFlags(jsonConfig.Secret, jsonConfig.SecretFile, jsonConfig.CertFile)
 	if err != nil {
 		return fmt.Errorf("error retrieving flags - %v", err)
 	}
-	slog.Debug("flags content", "flags", flags)
+	log.Debug().Str("flags", flags).Msg("flags content")
 	if err := writeContentExists(jsonConfig.FlagFile, flags, "flags", jsonConfig.Force); err != nil {
 		return err
 	}
-	slog.Info("flags ready", "path", jsonConfig.FlagFile)
+	log.Info().Str("path", jsonConfig.FlagFile).Msg("flags ready")
 	return nil
 }
 
 // Function to action on cert command
 func getCert(c *cli.Context) error {
-	slog.Debug("getting cert", "url", osctrlURLs.Cert)
+	log.Debug().Str("url", osctrlURLs.Cert).Msg("getting cert")
 	cert, err := retrieveCert(jsonConfig.Secret, osctrlURLs.Cert, jsonConfig.Insecure)
 	if err != nil {
 		return fmt.Errorf("error retrieving cert - %v", err)
 	}
-	slog.Debug("cert content", "cert", cert)
+	log.Debug().Str("cert", cert).Msg("cert content")
 	if err := writeContentExists(jsonConfig.CertFile, cert, "cert", jsonConfig.Force); err != nil {
 		return err
 	}
-	slog.Info("cert ready", "path", jsonConfig.CertFile)
+	log.Info().Str("path", jsonConfig.CertFile).Msg("cert ready")
 	return nil
 }
 
 // Function to action on remove command. It retrieves the script to run the removal from osctrl
 func removeNode(c *cli.Context) error {
-	slog.Debug("removing node", "url", osctrlURLs.Remove)
+	log.Debug().Str("url", osctrlURLs.Remove).Msg("removing node")
 	script, err := retrieveScript(jsonConfig.Secret, osctrlURLs.Remove, jsonConfig.Insecure)
 	if err != nil {
 		return fmt.Errorf("error retrieving remove - %v", err)
@@ -113,33 +113,33 @@ func removeNode(c *cli.Context) error {
 // Function to action on verify command. It verifies flags, cert and secret for and enrolled node in osctrl
 func verifyNode(c *cli.Context) error {
 	// Compare secret with local
-	slog.Debug("comparing secret", "path", jsonConfig.SecretFile)
+	log.Debug().Str("path", jsonConfig.SecretFile).Msg("comparing secret")
 	if checkFileContent(jsonConfig.SecretFile, jsonConfig.Secret) {
-		slog.Info("osquery secret is valid")
+		log.Info().Msg("osquery secret is valid")
 	} else {
-		slog.Warn("osquery secret mismatch")
+		log.Warn().Msg("osquery secret mismatch")
 	}
 	// Retrieve verification
-	slog.Debug("retrieving verification", "url", osctrlURLs.Verify)
+	log.Debug().Str("url", osctrlURLs.Verify).Msg("retrieving verification")
 	verification, err := retrieveVerify(jsonConfig.Secret, jsonConfig.SecretFile, jsonConfig.CertFile, osctrlURLs.Verify, jsonConfig.Insecure)
 	if err != nil {
 		return fmt.Errorf("error retrieving verification - %v", err)
 	}
 	// Compare flags with local
-	slog.Debug("comparing flags", "path", jsonConfig.FlagFile)
+	log.Debug().Str("path", jsonConfig.FlagFile).Msg("comparing flags")
 	if checkFileContent(jsonConfig.FlagFile, strings.TrimSpace(verification.Flags)) {
-		slog.Info("flags are valid")
+		log.Info().Msg("flags are valid")
 	} else {
-		slog.Warn("flags mismatch")
+		log.Warn().Msg("flags mismatch")
 	}
 	// Retrieve certificate if flag is present
 	if strings.Contains(verification.Flags, FlagTLSServerCerts) {
 		// Compare certificate with local
-		slog.Debug("comparing certificate", "path", jsonConfig.CertFile)
+		log.Debug().Str("path", jsonConfig.CertFile).Msg("comparing certificate")
 		if checkFileContent(jsonConfig.CertFile, strings.TrimSpace(verification.Certificate)) {
-			slog.Info("osquery certificate is valid")
+			log.Info().Msg("osquery certificate is valid")
 		} else {
-			slog.Warn("osquery certificate mismatch")
+			log.Warn().Msg("osquery certificate mismatch")
 		}
 	}
 	// Check local files
@@ -154,25 +154,25 @@ func verifyNode(c *cli.Context) error {
 	}
 	validLocal := true
 	for _, l := range localFiles {
-		slog.Debug("checking local file", "path", l)
+		log.Debug().Str("path", l).Msg("checking local file")
 		if !checkFileExist(l) {
-			slog.Warn("local file missing", "path", l)
+			log.Warn().Str("path", l).Msg("local file missing")
 			validLocal = false
 		}
 	}
 	if validLocal {
-		slog.Info("osquery local files are present")
+		log.Info().Msg("osquery local files are present")
 		// osquery version check
-		slog.Debug("expected osquery version", "version", verification.OsqueryVersion)
+		log.Debug().Str("version", verification.OsqueryVersion).Msg("expected osquery version")
 		existingVersion := getOsqueryVersion()
-		slog.Debug("existing osquery version", "version", existingVersion)
+		log.Debug().Str("version", existingVersion).Msg("existing osquery version")
 		if osqueryVersionCompare(existingVersion, verification.OsqueryVersion) > 1 {
-			slog.Warn("osquery version too low", "existing", existingVersion, "required", verification.OsqueryVersion)
+			log.Warn().Str("existing", existingVersion).Str("required", verification.OsqueryVersion).Msg("osquery version too low")
 		} else {
-			slog.Info("osquery version is valid", "version", existingVersion)
+			log.Info().Str("version", existingVersion).Msg("osquery version is valid")
 		}
 		// Check if osquery is running
-		slog.Debug("checking running process")
+		log.Debug().Msg("checking running process")
 		ps, err := process.Processes()
 		if err != nil {
 			return fmt.Errorf("error getting processes - %s", err)
@@ -188,12 +188,12 @@ func verifyNode(c *cli.Context) error {
 			}
 		}
 		if osqueryRunning {
-			slog.Info("osqueryd is running", "pid", osqueryPid)
+			log.Info().Int32("pid", osqueryPid).Msg("osqueryd is running")
 		} else {
-			slog.Warn("osqueryd is not running")
+			log.Warn().Msg("osqueryd is not running")
 		}
 	} else {
-		slog.Error("osquery is not installed")
+		log.Error().Msg("osquery is not installed")
 	}
 	return nil
 }

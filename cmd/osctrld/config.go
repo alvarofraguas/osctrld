@@ -1,8 +1,7 @@
 package main
 
 import (
-	"log/slog"
-
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
@@ -30,7 +29,7 @@ type JSONConfiguration struct {
 // Function to load the configuration file and assign to variables
 func loadConfiguration(file string, verbose bool) (JSONConfiguration, error) {
 	var cfg JSONConfiguration
-	slog.Debug("loading configuration", "path", file)
+	log.Debug().Str("path", file).Msg("loading configuration")
 	// Load file and read config
 	viper.SetConfigFile(file)
 	if err := viper.ReadInConfig(); err != nil {

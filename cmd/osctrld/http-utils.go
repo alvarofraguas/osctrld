@@ -5,9 +5,10 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"net/url"
+
+	"github.com/rs/zerolog/log"
 )
 
 // JSONApplication for Content-Type headers
@@ -70,7 +71,7 @@ func SendRequest(reqType, reqURL string, params io.Reader, headers map[string]st
 	//defer resp.Body.Close()
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			slog.Error("failed to close response body", "error", err)
+			log.Error().Err(err).Msg("failed to close response body")
 		}
 	}()
 	// Read body

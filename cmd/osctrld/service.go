@@ -23,13 +23,27 @@ func syncOnce(c *cli.Context) {
 	jsonConfig.Force = true
 	defer func() { jsonConfig.Force = originalForce }()
 
+	var flagsChanged, certChanged bool
+
 	log.Info().Msg("syncing flags")
-	if _, err := getFlags(c); err != nil {
+	if changed, err := getFlags(c); err != nil {
 		log.Error().Err(err).Msg("failed to sync flags")
+	} else {
+		flagsChanged = changed
 	}
+
 	log.Info().Msg("syncing cert")
-	if _, err := getCert(c); err != nil {
+	if changed, err := getCert(c); err != nil {
 		log.Error().Err(err).Msg("failed to sync cert")
+	} else {
+		certChanged = changed
+	}
+
+	if flagsChanged || certChanged {
+		log.Info().Bool("flags_changed", flagsChanged).Bool("cert_changed", certChanged).Msg("configuration changed, restarting osquery")
+		if err := restartOsquery(); err != nil {
+			log.Error().Err(err).Msg("failed to restart osquery")
+		}
 	}
 }
 

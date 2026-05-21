@@ -1,7 +1,11 @@
 package main
 
 import (
+	"context"
 	"math/rand/v2"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -30,5 +34,24 @@ func syncOnce(c *cli.Context) {
 }
 
 func serviceNode(c *cli.Context) error {
-	return nil
+	interval := time.Duration(jsonConfig.Interval) * time.Minute
+	log.Info().Int("interval_minutes", jsonConfig.Interval).Msg("starting service")
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	syncOnce(c)
+
+	for {
+		wait := intervalWithJitter(interval)
+		log.Debug().Dur("next_sync", wait).Msg("waiting for next sync")
+
+		select {
+		case <-time.After(wait):
+			syncOnce(c)
+		case <-ctx.Done():
+			log.Info().Msg("shutting down")
+			return nil
+		}
+	}
 }

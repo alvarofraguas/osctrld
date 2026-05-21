@@ -159,7 +159,7 @@ func init() {
 			Value:       false,
 			Usage:       "Overwrite existing files for flags, certificate and secret",
 			EnvVars:     []string{"OSCTRL_FORCE"},
-			Destination: &jsonConfig.Verbose,
+			Destination: &jsonConfig.Force,
 		},
 	}
 	// Initialize CLI flags commands
@@ -313,17 +313,23 @@ func cliAction(c *cli.Context) error {
 	return nil
 }
 
+// buildApp creates and configures the CLI application
+func buildApp() *cli.App {
+	a := cli.NewApp()
+	a.Name = appName
+	a.Usage = appUsage
+	a.Version = appVersion
+	a.Description = appDescription
+	a.Flags = flags
+	a.Commands = commands
+	a.Action = cliAction
+	return a
+}
+
 // Go go!
 func main() {
 	// Let's go!
-	app = cli.NewApp()
-	app.Name = appName
-	app.Usage = appUsage
-	app.Version = appVersion
-	app.Description = appDescription
-	app.Flags = flags
-	app.Commands = commands
-	app.Action = cliAction
+	app = buildApp()
 	if err := app.Run(os.Args); err != nil {
 		log.Fatalf("Failed to execute %v", err)
 	}

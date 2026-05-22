@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 	"testing"
 
 	"gotest.tools/assert"
@@ -53,8 +54,8 @@ func TestGenURLs(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(OsctrlURLFlags, "http://localhost:8080/dev"), urls.Flags)
 	assert.Equal(t, fmt.Sprintf(OsctrlURLCert, "http://localhost:8080/dev"), urls.Cert)
 	assert.Equal(t, fmt.Sprintf(OsctrlURLVerify, "http://localhost:8080/dev"), urls.Verify)
-	assert.Equal(t, fmt.Sprintf(OsctrlURLScript, "http://localhost:8080/dev", OsctrlEnroll, "darwin"), urls.Enroll)
-	assert.Equal(t, fmt.Sprintf(OsctrlURLScript, "http://localhost:8080/dev", OsctrlRemove, "darwin"), urls.Remove)
+	assert.Equal(t, fmt.Sprintf(OsctrlURLScript, "http://localhost:8080/dev", OsctrlEnroll, runtime.GOOS), urls.Enroll)
+	assert.Equal(t, fmt.Sprintf(OsctrlURLScript, "http://localhost:8080/dev", OsctrlRemove, runtime.GOOS), urls.Remove)
 	assert.Equal(t, "http://localhost:8080/dev/osctrld-extensions", urls.Extensions)
 }
 

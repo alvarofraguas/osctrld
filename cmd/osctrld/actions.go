@@ -57,6 +57,17 @@ type VerifyResponse struct {
 	OsqueryVersion string `json:"osquery_version"`
 }
 
+// ExtensionEntry represents a single extension from the manifest
+type ExtensionEntry struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+}
+
+// ExtensionsRequest to retrieve extension manifest
+type ExtensionsRequest struct {
+	Secret string `json:"secret"`
+}
+
 // Function to action on enroll command
 func enrollNode(c *cli.Context) error {
 	log.Debug().Str("url", osctrlURLs.Enroll).Msg("enrolling node")

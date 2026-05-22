@@ -46,7 +46,7 @@ func newTestCLIContext() *cli.Context {
 func TestGetFlags_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("--tls_hostname=osctrl.example.com"))
+		_, _ = w.Write([]byte("--tls_hostname=osctrl.example.com"))
 	}))
 	defer server.Close()
 
@@ -67,7 +67,7 @@ func TestGetFlags_Success(t *testing.T) {
 func TestGetFlags_ServerError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("server error"))
+		_, _ = w.Write([]byte("server error"))
 	}))
 	defer server.Close()
 
@@ -85,7 +85,7 @@ func TestGetCert_Success(t *testing.T) {
 	certPEM := "-----BEGIN CERTIFICATE-----\nMIIBtest\n-----END CERTIFICATE-----"
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(certPEM))
+		_, _ = w.Write([]byte(certPEM))
 	}))
 	defer server.Close()
 
@@ -106,7 +106,7 @@ func TestGetCert_Success(t *testing.T) {
 func TestGetCert_ServerError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
-		w.Write([]byte("forbidden"))
+		_, _ = w.Write([]byte("forbidden"))
 	}))
 	defer server.Close()
 
@@ -123,7 +123,7 @@ func TestGetCert_ServerError(t *testing.T) {
 func TestEnrollNode_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("#!/bin/bash\necho enrolled"))
+		_, _ = w.Write([]byte("#!/bin/bash\necho enrolled"))
 	}))
 	defer server.Close()
 
@@ -139,7 +139,7 @@ func TestEnrollNode_Success(t *testing.T) {
 func TestEnrollNode_ServerError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("error"))
+		_, _ = w.Write([]byte("error"))
 	}))
 	defer server.Close()
 
@@ -156,7 +156,7 @@ func TestEnrollNode_ServerError(t *testing.T) {
 func TestRemoveNode_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("#!/bin/bash\necho removed"))
+		_, _ = w.Write([]byte("#!/bin/bash\necho removed"))
 	}))
 	defer server.Close()
 
@@ -172,7 +172,7 @@ func TestRemoveNode_Success(t *testing.T) {
 func TestRemoveNode_ServerError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("error"))
+		_, _ = w.Write([]byte("error"))
 	}))
 	defer server.Close()
 
@@ -195,9 +195,9 @@ func TestVerifyNode_Success(t *testing.T) {
 	flagContent := "--tls_hostname=osctrl.example.com\n--tls_server_certs=/etc/osquery/osctrl.crt"
 	certContent := "-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----"
 
-	os.WriteFile(secretPath, []byte("test-secret"), 0644)
-	os.WriteFile(flagPath, []byte(flagContent), 0644)
-	os.WriteFile(certPath, []byte(certContent), 0644)
+	require.NoError(t, os.WriteFile(secretPath, []byte("test-secret"), 0644))
+	require.NoError(t, os.WriteFile(flagPath, []byte(flagContent), 0644))
+	require.NoError(t, os.WriteFile(certPath, []byte(certContent), 0644))
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp := VerifyResponse{
@@ -205,7 +205,7 @@ func TestVerifyNode_Success(t *testing.T) {
 			Certificate:    certContent,
 			OsqueryVersion: "5.0.0",
 		}
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 

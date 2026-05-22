@@ -28,7 +28,7 @@ func TestWriteContentExists_NewFile(t *testing.T) {
 func TestWriteContentExists_SameContent(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "existing.txt")
-	os.WriteFile(path, []byte("hello"), 0700)
+	require.NoError(t, os.WriteFile(path, []byte("hello"), 0700))
 
 	changed, err := writeContentExists(path, "hello", "test", false)
 	assert.NoError(t, err)
@@ -38,7 +38,7 @@ func TestWriteContentExists_SameContent(t *testing.T) {
 func TestWriteContentExists_DifferentContentNoForce(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "existing.txt")
-	os.WriteFile(path, []byte("old"), 0700)
+	require.NoError(t, os.WriteFile(path, []byte("old"), 0700))
 
 	changed, err := writeContentExists(path, "new", "test", false)
 	assert.Error(t, err)
@@ -52,7 +52,7 @@ func TestWriteContentExists_DifferentContentNoForce(t *testing.T) {
 func TestWriteContentExists_DifferentContentWithForce(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "existing.txt")
-	os.WriteFile(path, []byte("old"), 0700)
+	require.NoError(t, os.WriteFile(path, []byte("old"), 0700))
 
 	changed, err := writeContentExists(path, "new", "test", true)
 	assert.NoError(t, err)
@@ -66,11 +66,11 @@ func mockOsctrlServer() *httptest.Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/env/osctrld-flags", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("--tls_hostname=osctrl.example.com\n--tls_server_certs=/etc/osquery/osctrl.crt"))
+		_, _ = w.Write([]byte("--tls_hostname=osctrl.example.com\n--tls_server_certs=/etc/osquery/osctrl.crt"))
 	})
 	mux.HandleFunc("/env/osctrld-cert", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("-----BEGIN CERTIFICATE-----\nMIIBxTCCAWugAwIBAgIJALP...\n-----END CERTIFICATE-----"))
+		_, _ = w.Write([]byte("-----BEGIN CERTIFICATE-----\nMIIBxTCCAWugAwIBAgIJALP...\n-----END CERTIFICATE-----"))
 	})
 	mux.HandleFunc("/env/osctrld-verify", func(w http.ResponseWriter, r *http.Request) {
 		resp := VerifyResponse{
@@ -78,19 +78,19 @@ func mockOsctrlServer() *httptest.Server {
 			Certificate:    "-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----",
 			OsqueryVersion: "5.0.0",
 		}
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	})
 	mux.HandleFunc("/env/enroll/darwin/osctrld-script", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("#!/bin/bash\necho enroll"))
+		_, _ = w.Write([]byte("#!/bin/bash\necho enroll"))
 	})
 	mux.HandleFunc("/env/remove/darwin/osctrld-script", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("#!/bin/bash\necho remove"))
+		_, _ = w.Write([]byte("#!/bin/bash\necho remove"))
 	})
 	mux.HandleFunc("/error", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("internal error"))
+		_, _ = w.Write([]byte("internal error"))
 	})
 	return httptest.NewServer(mux)
 }

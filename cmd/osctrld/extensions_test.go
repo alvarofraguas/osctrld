@@ -17,7 +17,7 @@ func TestRetrieveExtensionManifest_Success(t *testing.T) {
 		{Name: "test_ext.ext", URL: "http://example.com/test_ext.ext"},
 	}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(manifest)
+		_ = json.NewEncoder(w).Encode(manifest)
 	}))
 	defer server.Close()
 
@@ -29,7 +29,7 @@ func TestRetrieveExtensionManifest_Success(t *testing.T) {
 
 func TestRetrieveExtensionManifest_Empty(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode([]ExtensionEntry{})
+		_ = json.NewEncoder(w).Encode([]ExtensionEntry{})
 	}))
 	defer server.Close()
 
@@ -41,7 +41,7 @@ func TestRetrieveExtensionManifest_Empty(t *testing.T) {
 func TestRetrieveExtensionManifest_ServerError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("error"))
+		_, _ = w.Write([]byte("error"))
 	}))
 	defer server.Close()
 
@@ -52,7 +52,7 @@ func TestRetrieveExtensionManifest_ServerError(t *testing.T) {
 func TestDownloadExtension_Success(t *testing.T) {
 	binaryContent := []byte("#!/bin/sh\necho extension")
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(binaryContent)
+		_, _ = w.Write(binaryContent)
 	}))
 	defer server.Close()
 
@@ -75,13 +75,13 @@ func TestDownloadExtension_Success(t *testing.T) {
 func TestDownloadExtension_NoChange(t *testing.T) {
 	binaryContent := []byte("#!/bin/sh\necho extension")
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(binaryContent)
+		_, _ = w.Write(binaryContent)
 	}))
 	defer server.Close()
 
 	dir := t.TempDir()
 	path := filepath.Join(dir, "test_ext.ext")
-	os.WriteFile(path, binaryContent, 0755)
+	require.NoError(t, os.WriteFile(path, binaryContent, 0755))
 
 	changed, err := downloadExtension(server.URL, path, false)
 	assert.NoError(t, err)
@@ -96,10 +96,10 @@ func TestSyncExtensions_Success(t *testing.T) {
 		manifest := []ExtensionEntry{
 			{Name: "test_ext.ext", URL: "http://" + r.Host + "/binary"},
 		}
-		json.NewEncoder(w).Encode(manifest)
+		_ = json.NewEncoder(w).Encode(manifest)
 	})
 	mux.HandleFunc("/binary", func(w http.ResponseWriter, r *http.Request) {
-		w.Write(binaryContent)
+		_, _ = w.Write(binaryContent)
 	})
 	server := httptest.NewServer(mux)
 	defer server.Close()
@@ -121,7 +121,7 @@ func TestSyncExtensions_Success(t *testing.T) {
 
 func TestSyncExtensions_EmptyManifest(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode([]ExtensionEntry{})
+		_ = json.NewEncoder(w).Encode([]ExtensionEntry{})
 	}))
 	defer server.Close()
 

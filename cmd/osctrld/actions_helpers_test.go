@@ -164,7 +164,7 @@ func TestRetrieveFlags(t *testing.T) {
 func TestCheckFileExist(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "exists.txt")
-	os.WriteFile(path, []byte("data"), 0644)
+	require.NoError(t, os.WriteFile(path, []byte("data"), 0644))
 
 	assert.True(t, checkFileExist(path))
 	assert.False(t, checkFileExist(filepath.Join(dir, "nope.txt")))
@@ -173,7 +173,7 @@ func TestCheckFileExist(t *testing.T) {
 func TestCheckFileContent(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "content.txt")
-	os.WriteFile(path, []byte("hello world"), 0644)
+	require.NoError(t, os.WriteFile(path, []byte("hello world"), 0644))
 
 	assert.True(t, checkFileContent(path, "hello world"))
 	assert.False(t, checkFileContent(path, "different"))
@@ -183,7 +183,7 @@ func TestCheckFileContent(t *testing.T) {
 func TestCheckFileContent_Whitespace(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "ws.txt")
-	os.WriteFile(path, []byte("  hello  \n"), 0644)
+	require.NoError(t, os.WriteFile(path, []byte("  hello  \n"), 0644))
 
 	assert.True(t, checkFileContent(path, "hello"))
 }

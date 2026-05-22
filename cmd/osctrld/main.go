@@ -260,6 +260,9 @@ func cliWrapper(action func(*cli.Context) error) func(*cli.Context) error {
 			if jsonConfig.RemoveScript == "" {
 				jsonConfig.RemoveScript = genFullPath(jsonConfig.OsqueryPath, defRemoveScript+shExtension)
 			}
+			if jsonConfig.ExtensionsDir == "" {
+				jsonConfig.ExtensionsDir = genFullPath(jsonConfig.OsqueryPath, "extensions/")
+			}
 		case LinuxOS:
 			if jsonConfig.OsqueryPath == defEmptyValue {
 				jsonConfig.OsqueryPath = defLinuxPath
@@ -279,6 +282,9 @@ func cliWrapper(action func(*cli.Context) error) func(*cli.Context) error {
 			if jsonConfig.RemoveScript == "" {
 				jsonConfig.RemoveScript = genFullPath(jsonConfig.OsqueryPath, defRemoveScript+shExtension)
 			}
+			if jsonConfig.ExtensionsDir == "" {
+				jsonConfig.ExtensionsDir = genFullPath(jsonConfig.OsqueryPath, "extensions/")
+			}
 		case WindowsOS:
 			if jsonConfig.OsqueryPath == defEmptyValue {
 				jsonConfig.OsqueryPath = defWindowsPath
@@ -297,6 +303,9 @@ func cliWrapper(action func(*cli.Context) error) func(*cli.Context) error {
 			}
 			if jsonConfig.RemoveScript == "" {
 				jsonConfig.RemoveScript = genFullPath(jsonConfig.OsqueryPath, defRemoveScript+ps1Extension)
+			}
+			if jsonConfig.ExtensionsDir == "" {
+				jsonConfig.ExtensionsDir = genFullPath(jsonConfig.OsqueryPath, "extensions/")
 			}
 		}
 		// Check for required parameters

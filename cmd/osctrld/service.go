@@ -19,9 +19,9 @@ func intervalWithJitter(base time.Duration) time.Duration {
 }
 
 func syncOnce(c *cli.Context) {
-	originalForce := jsonConfig.Force
-	jsonConfig.Force = true
-	defer func() { jsonConfig.Force = originalForce }()
+	originalForce := appConfig.Force
+	appConfig.Force = true
+	defer func() { appConfig.Force = originalForce }()
 
 	var flagsChanged, certChanged, extensionsChanged bool
 
@@ -58,8 +58,8 @@ func syncOnce(c *cli.Context) {
 }
 
 func serviceNode(c *cli.Context) error {
-	interval := time.Duration(jsonConfig.Interval) * time.Minute
-	log.Info().Int("interval_minutes", jsonConfig.Interval).Msg("starting service")
+	interval := time.Duration(appConfig.Interval) * time.Minute
+	log.Info().Int("interval_minutes", appConfig.Interval).Msg("starting service")
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

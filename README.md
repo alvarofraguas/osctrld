@@ -44,28 +44,27 @@ go build -o osctrld ./cmd/osctrld/
 
 ## Configuration
 
-osctrld can be configured via a JSON file, CLI flags, or environment variables.
+osctrld can be configured via a YAML or JSON file, CLI flags, or environment variables. YAML is the default format.
 
 ### Configuration file
 
-```json
-{
-  "osctrld": {
-    "secret": "your-enrollment-secret",
-    "secretFile": "/etc/osquery/osquery.secret",
-    "flags": "/etc/osquery/osquery.flags",
-    "cert": "/etc/osquery/osctrl.crt",
-    "environment": "production",
-    "baseurl": "https://osctrl.example.com",
-    "insecure": false,
-    "verbose": false,
-    "force": true,
-    "logFormat": "text",
-    "interval": 60,
-    "extensionsDir": "/etc/osquery/extensions/"
-  }
-}
+```yaml
+osctrld:
+  secret: "your-enrollment-secret"
+  secretFile: "/etc/osquery/osquery.secret"
+  flags: "/etc/osquery/osquery.flags"
+  cert: "/etc/osquery/osctrl.crt"
+  environment: "production"
+  baseurl: "https://osctrl.example.com"
+  insecure: false
+  verbose: false
+  force: true
+  logFormat: "text"
+  interval: 60
+  extensionsDir: "/etc/osquery/extensions/"
 ```
+
+JSON configuration files are also supported — use a `.json` extension and the format is detected automatically.
 
 ### Configuration fields
 
@@ -104,20 +103,20 @@ COMMANDS:
 Retrieve flags and certificate:
 
 ```shell
-osctrld flags --config /etc/osctrld/config.json
-osctrld cert --config /etc/osctrld/config.json
+osctrld flags --config /etc/osctrld/config.yaml
+osctrld cert --config /etc/osctrld/config.yaml
 ```
 
 Enroll a new node:
 
 ```shell
-osctrld enroll --config /etc/osctrld/config.json
+osctrld enroll --config /etc/osctrld/config.yaml
 ```
 
 Verify configuration:
 
 ```shell
-osctrld verify --config /etc/osctrld/config.json
+osctrld verify --config /etc/osctrld/config.yaml
 ```
 
 ### Daemon mode
@@ -125,7 +124,7 @@ osctrld verify --config /etc/osctrld/config.json
 Run osctrld as a long-lived daemon that periodically syncs configuration from osctrl:
 
 ```shell
-osctrld service --config /etc/osctrld/config.json --interval 60
+osctrld service --config /etc/osctrld/config.yaml --interval 60
 ```
 
 In daemon mode, osctrld will:
@@ -144,8 +143,8 @@ Copy the service file and configuration:
 ```shell
 cp osctrld /opt/osctrld/
 cp service/linux/systemd.service /etc/systemd/system/osctrld.service
-cp service/osctrld-sample.json /etc/osctrld/service.json
-# Edit /etc/osctrld/service.json with your values
+cp service/osctrld-sample.yaml /etc/osctrld/service.yaml
+# Edit /etc/osctrld/service.yaml with your values
 
 systemctl daemon-reload
 systemctl enable osctrld

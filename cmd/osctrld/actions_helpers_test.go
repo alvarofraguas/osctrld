@@ -154,7 +154,7 @@ func TestRetrieveFlags(t *testing.T) {
 	defer server.Close()
 
 	osctrlURLs.Flags = server.URL + "/env/osctrld-flags"
-	jsonConfig.Insecure = false
+	appConfig.Insecure = false
 
 	flags, err := retrieveFlags("test-secret", "/tmp/secret", "/tmp/cert")
 	assert.NoError(t, err)

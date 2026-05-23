@@ -45,7 +45,7 @@ func downloadExtension(url, destPath string, insecure bool) (bool, error) {
 
 func syncExtensions() (bool, error) {
 	log.Info().Msg("syncing extensions")
-	manifest, err := retrieveExtensionManifest(jsonConfig.Secret, osctrlURLs.Extensions, jsonConfig.Insecure)
+	manifest, err := retrieveExtensionManifest(appConfig.Secret, osctrlURLs.Extensions, appConfig.Insecure)
 	if err != nil {
 		return false, err
 	}
@@ -53,14 +53,14 @@ func syncExtensions() (bool, error) {
 		log.Debug().Msg("no extensions in manifest")
 		return false, nil
 	}
-	if err := os.MkdirAll(jsonConfig.ExtensionsDir, 0755); err != nil {
+	if err := os.MkdirAll(appConfig.ExtensionsDir, 0755); err != nil {
 		return false, fmt.Errorf("error creating extensions directory - %v", err)
 	}
 	anyChanged := false
 	for _, ext := range manifest {
-		destPath := filepath.Join(jsonConfig.ExtensionsDir, ext.Name)
+		destPath := filepath.Join(appConfig.ExtensionsDir, ext.Name)
 		log.Debug().Str("name", ext.Name).Str("url", ext.URL).Msg("downloading extension")
-		changed, err := downloadExtension(ext.URL, destPath, jsonConfig.Insecure)
+		changed, err := downloadExtension(ext.URL, destPath, appConfig.Insecure)
 		if err != nil {
 			log.Error().Err(err).Str("name", ext.Name).Msg("failed to download extension")
 			continue

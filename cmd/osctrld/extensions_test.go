@@ -105,9 +105,9 @@ func TestSyncExtensions_Success(t *testing.T) {
 	defer server.Close()
 
 	dir := t.TempDir()
-	jsonConfig.Secret = "test-secret"
-	jsonConfig.ExtensionsDir = dir
-	jsonConfig.Insecure = false
+	appConfig.Secret = "test-secret"
+	appConfig.ExtensionsDir = dir
+	appConfig.Insecure = false
 	osctrlURLs.Extensions = server.URL + "/manifest"
 
 	changed, err := syncExtensions()
@@ -125,8 +125,8 @@ func TestSyncExtensions_EmptyManifest(t *testing.T) {
 	}))
 	defer server.Close()
 
-	jsonConfig.Secret = "test-secret"
-	jsonConfig.Insecure = false
+	appConfig.Secret = "test-secret"
+	appConfig.Insecure = false
 	osctrlURLs.Extensions = server.URL
 
 	changed, err := syncExtensions()

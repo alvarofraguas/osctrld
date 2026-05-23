@@ -71,7 +71,7 @@ type ExtensionsRequest struct {
 // Function to action on enroll command
 func enrollNode(c *cli.Context) error {
 	log.Debug().Str("url", osctrlURLs.Enroll).Msg("enrolling node")
-	script, err := retrieveScript(jsonConfig.Secret, osctrlURLs.Enroll, jsonConfig.Insecure)
+	script, err := retrieveScript(appConfig.Secret, osctrlURLs.Enroll, appConfig.Insecure)
 	if err != nil {
 		return fmt.Errorf("error retrieving enroll - %v", err)
 	}
@@ -82,39 +82,39 @@ func enrollNode(c *cli.Context) error {
 // Function to action on flags command
 func getFlags(c *cli.Context) (bool, error) {
 	log.Debug().Str("url", osctrlURLs.Flags).Msg("getting flags")
-	flags, err := retrieveFlags(jsonConfig.Secret, jsonConfig.SecretFile, jsonConfig.CertFile)
+	flags, err := retrieveFlags(appConfig.Secret, appConfig.SecretFile, appConfig.CertFile)
 	if err != nil {
 		return false, fmt.Errorf("error retrieving flags - %v", err)
 	}
 	log.Debug().Str("flags", flags).Msg("flags content")
-	changed, err := writeContentExists(jsonConfig.FlagFile, flags, "flags", jsonConfig.Force)
+	changed, err := writeContentExists(appConfig.FlagFile, flags, "flags", appConfig.Force)
 	if err != nil {
 		return false, err
 	}
-	log.Info().Str("path", jsonConfig.FlagFile).Msg("flags ready")
+	log.Info().Str("path", appConfig.FlagFile).Msg("flags ready")
 	return changed, nil
 }
 
 // Function to action on cert command
 func getCert(c *cli.Context) (bool, error) {
 	log.Debug().Str("url", osctrlURLs.Cert).Msg("getting cert")
-	cert, err := retrieveCert(jsonConfig.Secret, osctrlURLs.Cert, jsonConfig.Insecure)
+	cert, err := retrieveCert(appConfig.Secret, osctrlURLs.Cert, appConfig.Insecure)
 	if err != nil {
 		return false, fmt.Errorf("error retrieving cert - %v", err)
 	}
 	log.Debug().Str("cert", cert).Msg("cert content")
-	changed, err := writeContentExists(jsonConfig.CertFile, cert, "cert", jsonConfig.Force)
+	changed, err := writeContentExists(appConfig.CertFile, cert, "cert", appConfig.Force)
 	if err != nil {
 		return false, err
 	}
-	log.Info().Str("path", jsonConfig.CertFile).Msg("cert ready")
+	log.Info().Str("path", appConfig.CertFile).Msg("cert ready")
 	return changed, nil
 }
 
 // Function to action on remove command. It retrieves the script to run the removal from osctrl
 func removeNode(c *cli.Context) error {
 	log.Debug().Str("url", osctrlURLs.Remove).Msg("removing node")
-	script, err := retrieveScript(jsonConfig.Secret, osctrlURLs.Remove, jsonConfig.Insecure)
+	script, err := retrieveScript(appConfig.Secret, osctrlURLs.Remove, appConfig.Insecure)
 	if err != nil {
 		return fmt.Errorf("error retrieving remove - %v", err)
 	}
@@ -126,21 +126,21 @@ func removeNode(c *cli.Context) error {
 // Function to action on verify command. It verifies flags, cert and secret for and enrolled node in osctrl
 func verifyNode(c *cli.Context) error {
 	// Compare secret with local
-	log.Debug().Str("path", jsonConfig.SecretFile).Msg("comparing secret")
-	if checkFileContent(jsonConfig.SecretFile, jsonConfig.Secret) {
+	log.Debug().Str("path", appConfig.SecretFile).Msg("comparing secret")
+	if checkFileContent(appConfig.SecretFile, appConfig.Secret) {
 		log.Info().Msg("osquery secret is valid")
 	} else {
 		log.Warn().Msg("osquery secret mismatch")
 	}
 	// Retrieve verification
 	log.Debug().Str("url", osctrlURLs.Verify).Msg("retrieving verification")
-	verification, err := retrieveVerify(jsonConfig.Secret, jsonConfig.SecretFile, jsonConfig.CertFile, osctrlURLs.Verify, jsonConfig.Insecure)
+	verification, err := retrieveVerify(appConfig.Secret, appConfig.SecretFile, appConfig.CertFile, osctrlURLs.Verify, appConfig.Insecure)
 	if err != nil {
 		return fmt.Errorf("error retrieving verification - %v", err)
 	}
 	// Compare flags with local
-	log.Debug().Str("path", jsonConfig.FlagFile).Msg("comparing flags")
-	if checkFileContent(jsonConfig.FlagFile, strings.TrimSpace(verification.Flags)) {
+	log.Debug().Str("path", appConfig.FlagFile).Msg("comparing flags")
+	if checkFileContent(appConfig.FlagFile, strings.TrimSpace(verification.Flags)) {
 		log.Info().Msg("flags are valid")
 	} else {
 		log.Warn().Msg("flags mismatch")
@@ -148,8 +148,8 @@ func verifyNode(c *cli.Context) error {
 	// Retrieve certificate if flag is present
 	if strings.Contains(verification.Flags, FlagTLSServerCerts) {
 		// Compare certificate with local
-		log.Debug().Str("path", jsonConfig.CertFile).Msg("comparing certificate")
-		if checkFileContent(jsonConfig.CertFile, strings.TrimSpace(verification.Certificate)) {
+		log.Debug().Str("path", appConfig.CertFile).Msg("comparing certificate")
+		if checkFileContent(appConfig.CertFile, strings.TrimSpace(verification.Certificate)) {
 			log.Info().Msg("osquery certificate is valid")
 		} else {
 			log.Warn().Msg("osquery certificate mismatch")

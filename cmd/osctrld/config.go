@@ -9,39 +9,36 @@ const (
 	configurationKey = "osctrld"
 )
 
-// JSONConfiguration to hold all configuration values for osctrld
-type JSONConfiguration struct {
-	Secret       string `json:"secret"`
-	SecretFile   string `json:"secretFile"`
-	FlagFile     string `json:"flags"`
-	CertFile     string `json:"cert"`
-	EnrollScript string `json:"enrollScript"`
-	RemoveScript string `json:"removeScript"`
-	OsqueryPath  string `json:"osquery"`
-	Environment  string `json:"environment"`
-	BaseURL      string `json:"baseurl"`
-	Insecure     bool   `json:"insecure"`
-	Verbose      bool   `json:"verbose"`
-	Force        bool   `json:"force"`
-	LogFormat    string `json:"logFormat"`
-	Interval      int    `json:"interval"`
-	ExtensionsDir string `json:"extensionsDir"`
+// Configuration holds all configuration values for osctrld.
+// Supports both YAML (default) and JSON config files.
+type Configuration struct {
+	Secret        string `json:"secret" yaml:"secret" mapstructure:"secret"`
+	SecretFile    string `json:"secretFile" yaml:"secretFile" mapstructure:"secretFile"`
+	FlagFile      string `json:"flags" yaml:"flags" mapstructure:"flags"`
+	CertFile      string `json:"cert" yaml:"cert" mapstructure:"cert"`
+	EnrollScript  string `json:"enrollScript" yaml:"enrollScript" mapstructure:"enrollScript"`
+	RemoveScript  string `json:"removeScript" yaml:"removeScript" mapstructure:"removeScript"`
+	OsqueryPath   string `json:"osquery" yaml:"osquery" mapstructure:"osquery"`
+	Environment   string `json:"environment" yaml:"environment" mapstructure:"environment"`
+	BaseURL       string `json:"baseurl" yaml:"baseurl" mapstructure:"baseurl"`
+	Insecure      bool   `json:"insecure" yaml:"insecure" mapstructure:"insecure"`
+	Verbose       bool   `json:"verbose" yaml:"verbose" mapstructure:"verbose"`
+	Force         bool   `json:"force" yaml:"force" mapstructure:"force"`
+	LogFormat     string `json:"logFormat" yaml:"logFormat" mapstructure:"logFormat"`
+	Interval      int    `json:"interval" yaml:"interval" mapstructure:"interval"`
+	ExtensionsDir string `json:"extensionsDir" yaml:"extensionsDir" mapstructure:"extensionsDir"`
 }
 
-// Function to load the configuration file and assign to variables
-func loadConfiguration(file string, verbose bool) (JSONConfiguration, error) {
-	var cfg JSONConfiguration
+func loadConfiguration(file string, verbose bool) (Configuration, error) {
+	var cfg Configuration
 	log.Debug().Str("path", file).Msg("loading configuration")
-	// Load file and read config
 	viper.SetConfigFile(file)
 	if err := viper.ReadInConfig(); err != nil {
 		return cfg, err
 	}
-	// Configuration values
 	configRaw := viper.Sub(configurationKey)
 	if err := configRaw.Unmarshal(&cfg); err != nil {
 		return cfg, err
 	}
-	// No errors!
 	return cfg, nil
 }

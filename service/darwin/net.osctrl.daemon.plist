@@ -12,7 +12,7 @@
   <array>
     <string>/path/to/osctrld</string>
     <string>service</string>
-    <string>--config=/path/to/osctrld.json</string>
+    <string>--config=/path/to/osctrld.yaml</string>
   </array>
   <key>RunAtLoad</key>
   <true/>

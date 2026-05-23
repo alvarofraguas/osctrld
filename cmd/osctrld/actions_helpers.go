@@ -25,7 +25,7 @@ func retrieveFlags(secret, secretFile, certFile string) (string, error) {
 		return "", fmt.Errorf("error parsing data - %s", err)
 	}
 	jsonParam := strings.NewReader(string(jsonReq))
-	code, body, err := SendRequest(http.MethodPost, osctrlURLs.Flags, jsonParam, map[string]string{}, jsonConfig.Insecure)
+	code, body, err := SendRequest(http.MethodPost, osctrlURLs.Flags, jsonParam, map[string]string{}, appConfig.Insecure)
 	if err != nil {
 		return "", fmt.Errorf("error sending request - %v", err)
 	}

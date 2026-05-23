@@ -16,7 +16,7 @@ import (
 func setupTestConfig(t *testing.T, server *httptest.Server) (cleanup func()) {
 	dir := t.TempDir()
 
-	jsonConfig = JSONConfiguration{
+	appConfig = Configuration{
 		Secret:       "test-secret",
 		SecretFile:   filepath.Join(dir, "osquery.secret"),
 		FlagFile:     filepath.Join(dir, "osquery.flags"),
@@ -33,7 +33,7 @@ func setupTestConfig(t *testing.T, server *httptest.Server) (cleanup func()) {
 	osctrlURLs = genURLs(server.URL, "env", false)
 
 	return func() {
-		jsonConfig = JSONConfiguration{}
+		appConfig = Configuration{}
 		osctrlURLs = OsctrlURLs{}
 	}
 }
@@ -59,7 +59,7 @@ func TestGetFlags_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, changed, "new flags file should report changed")
 
-	content, err := os.ReadFile(jsonConfig.FlagFile)
+	content, err := os.ReadFile(appConfig.FlagFile)
 	require.NoError(t, err)
 	assert.Equal(t, "--tls_hostname=osctrl.example.com", string(content))
 }
@@ -98,7 +98,7 @@ func TestGetCert_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, changed, "new cert file should report changed")
 
-	content, err := os.ReadFile(jsonConfig.CertFile)
+	content, err := os.ReadFile(appConfig.CertFile)
 	require.NoError(t, err)
 	assert.Contains(t, string(content), "BEGIN CERTIFICATE")
 }
@@ -209,7 +209,7 @@ func TestVerifyNode_Success(t *testing.T) {
 	}))
 	defer server.Close()
 
-	jsonConfig = JSONConfiguration{
+	appConfig = Configuration{
 		Secret:      "test-secret",
 		SecretFile:  secretPath,
 		FlagFile:    flagPath,

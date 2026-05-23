@@ -55,6 +55,7 @@ docs/superpowers/
 
 # Configuration
 osctrld.json
+osctrld.yaml
 
 # Flags
 *.flags
